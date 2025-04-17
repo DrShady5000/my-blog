@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import Head from 'next/head';
-import styles from '../styles/Layout.module.css'; // Import the CSS module
-import { ReactNode } from 'react'; // Import ReactNode to type children
+import styles from '../styles/Layout.module.css'; 
+import { ReactNode } from 'react'; 
 
 interface LayoutProps {
-  children: ReactNode; // Explicitly type children as ReactNode
+  children: ReactNode;
 }
 
 const Layout = ({ children }: LayoutProps) => {
@@ -23,7 +23,7 @@ const Layout = ({ children }: LayoutProps) => {
       </header>
 
       <main className={styles.main}>
-        {children} {/* Render the children here */}
+        {children}
       </main>
 
       <footer className={styles.footer}>

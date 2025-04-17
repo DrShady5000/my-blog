@@ -1,4 +1,3 @@
-// pages/about.tsx
 import Layout from '../components/Layout';
 
 const About = () => {

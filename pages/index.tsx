@@ -1,51 +1,36 @@
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Layout from '../components/Layout';
-import { getPosts } from '../lib/posts';
+import Head from 'next/head';
+import styles from '../styles/Layout.module.css'; 
+import { ReactNode } from 'react'; 
 
-interface Post {
-  id: number;
-  title: string;
-  content: string;
+interface LayoutProps {
+  children: ReactNode;
 }
 
-const Home = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const data = await getPosts();
-      setPosts(data);
-    };
-
-    fetchPosts();
-  }, []);
-
+const Layout = ({ children }: LayoutProps) => {
   return (
-    <Layout>
-      <h1>Welcome to My Blog!</h1>
-      <p>This is where I document my journey in full-stack development, my projects, and my weight loss progress.</p>
+    <div className={styles.layout}>
+      <Head>
+        <title>Sahil's Blog</title>
+        <meta name="description" content="Sahil's full-stack blog" />
+      </Head>
+      
+      <header className={styles.header}>
+        <nav className={styles.nav}>
+          <Link href="/" className={styles.link}>Home</Link>
+          <Link href="/about" className={styles.link}>About</Link>
+        </nav>
+      </header>
 
-      {/* Create Post Button */}
-      <div style={{ margin: '20px 0' }}>
-        <Link href="/create-post">
-          <button style={{ padding: '10px 20px', background: '#64b5f6', color: '#fff', border: 'none', cursor: 'pointer' }}>
-            Create New Post
-          </button>
-        </Link>
-      </div>
+      <main className={styles.main}>
+        {children}
+      </main>
 
-      {/* List of Posts */}
-      <div>
-        {posts.map((post) => (
-          <div key={post.id} style={{ marginBottom: '20px' }}>
-            <h2>{post.title}</h2>
-            <p>{post.content}</p>
-          </div>
-        ))}
-      </div>
-    </Layout>
+      <footer className={styles.footer}>
+        <p>© 2025 Sahil Deo. All rights reserved.</p>
+      </footer>
+    </div>
   );
 };
 
-export default Home;
+export default Layout;
