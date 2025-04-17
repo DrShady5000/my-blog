@@ -1,0 +1,82 @@
+import { useRouter } from 'next/router';
+import Layout from '../../components/Layout'; 
+import fs from 'fs';
+import path from 'path';
+
+interface Post {
+  id: number | string;
+  title: string;
+  content: string;
+  date: string;
+  image?: string;
+}
+
+const PostPage = ({ post }: { post: Post | null }) => {
+  const router = useRouter();
+
+  if (router.isFallback) return <div>Loading...</div>;
+
+  if (!post) {
+    return (
+      <Layout>
+        <h1>Post not found</h1>
+        <p>The post you’re looking for doesn’t exist.</p>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <h1>{post.title}</h1>
+      <p><strong>Date:</strong> {post.date}</p>
+
+      <p>{post.content}</p>
+
+      {post.image && (
+        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+          <img
+            src={post.image}
+            alt={post.title}
+            style={{
+              maxWidth: '100%',
+              maxHeight: '80vh',
+              objectFit: 'contain',
+              borderRadius: '10px',
+            }}
+          />
+        </div>
+      )}
+    </Layout>
+  );
+};
+
+// This function gets all the paths for the dynamic pages (posts)
+export async function getStaticPaths() {
+  const filePath = path.join(process.cwd(), 'data', 'posts.json');
+  const fileContent = fs.readFileSync(filePath, 'utf-8');
+  const posts: Post[] = JSON.parse(fileContent);
+
+  const paths = posts.map(post => ({
+    params: { id: String(post.id) }, 
+  }));
+
+  return {
+    paths,
+    fallback: false, 
+  };
+}
+
+// This function fetches the data for a specific post based on the `id`
+export async function getStaticProps({ params }: { params: { id: string } }) {
+  const filePath = path.join(process.cwd(), 'data', 'posts.json');
+  const fileContent = fs.readFileSync(filePath, 'utf-8');
+  const posts: Post[] = JSON.parse(fileContent);
+
+  const post = posts.find(p => String(p.id) === params.id) || null;
+
+  return {
+    props: { post },
+  };
+}
+
+export default PostPage;

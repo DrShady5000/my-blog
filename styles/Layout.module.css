@@ -1,42 +1,104 @@
 .layout {
-    background-color: #121212; 
-    color: #e0e0e0; 
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-  
-  .header {
-    background-color: #181818;
-    color: #e0e0e0;
-    padding: 20px;
-  }
-  
-  .nav {
-    display: flex;
-    justify-content: center;
-  }
-  
-  .link {
-    color: #64b5f6; 
-    font-size: 20px;
-    margin-right: 20px;
-    text-decoration: none;
-  }
-  
-  .link:hover {
-    text-decoration: underline;
-  }
-  
-  .main {
-    padding: 20px;
-    flex-grow: 1;
-  }
-  
-  .footer {
-    background-color: #181818;
-    color: #e0e0e0;
-    text-align: center;
-    padding: 10px;
-  }
-  
+  background-color: #121212; 
+  color: #e0e0e0; 
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.header {
+  background-color: #181818;
+  color: #e0e0e0;
+  padding: 20px;
+}
+
+.nav {
+  display: flex;
+  justify-content: center;
+}
+
+.link {
+  color: #64b5f6; 
+  font-size: 20px;
+  margin-right: 20px;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.main {
+  padding: 20px;
+  flex-grow: 1;
+}
+
+.footer {
+  background-color: #181818;
+  color: #e0e0e0;
+  text-align: center;
+  padding: 10px;
+}
+
+.postList {
+  list-style-type: none; 
+  padding: 0;  
+}
+
+.postList li {
+  background-color: #2c2c2c; 
+  border-radius: 5px;
+  margin-bottom: 20px;
+  padding: 15px;
+}
+
+.postList h3 {
+  color: #64b5f6;  
+}
+
+.postList p {
+  font-size: 16px;
+  color: #e0e0e0; 
+}
+
+.postList button {
+  padding: 10px;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.postList button:hover {
+  background-color: #005bb5;
+}
+
+.postList {
+  list-style-type: none;
+  padding: 0;
+}
+
+.postItem {
+  background-color: #2c2c2c;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  padding: 15px;
+}
+
+.createPostButton {
+  padding: 10px;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.createPostButton:hover {
+  background-color: #005bb5;
+}
+
+.centerText {
+  text-align: center;
+  margin: 0 auto;
+  display: block;
+}

@@ -1,57 +1,111 @@
 import { useState } from 'react';
 import Layout from '../components/Layout';
 import { useRouter } from 'next/router';
+import styles from '../styles/CreatePost.module.css';
 
 const CreatePost = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [image, setImage] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newPost = {
-      id: Date.now(),
-      title,
-      content,
-    };
+    if (!title || !content) {
+      setError('Title and content are required.');
+      return;
+    }
 
-    const res = await fetch('/api/posts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newPost),
-    });
+    setIsLoading(true);
 
-    if (res.ok) {
-      router.push('/');
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('content', content);
+    if (image) {
+      formData.append('image', image);
+    }
+
+    try {
+      const res = await fetch('/api/posts', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        router.push('/');
+      } else {
+        throw new Error('Failed to create the post.');
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const file = e.target.files[0];
+  
+      // Check if the file exists and has a size property
+      if (file) {
+        const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+        if (file.size > MAX_SIZE) {
+          setError('File size must be less than 5MB.');
+          return;
+        }
+  
+        setImage(file);
+        setError(''); 
+      }
     }
   };
 
   return (
     <Layout>
-      <h1>Create a New Post</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="title">Title:</label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="content">Content:</label>
-          <textarea
-            id="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Create Post</button>
-      </form>
+      <div className={styles.container}>
+        <h1 className={styles.heading}>Create a New Post</h1>
+        {error && <p className={styles.error}>{error}</p>}
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.formGroup}>
+            <label htmlFor="title" className={styles.label}>Title:</label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className={styles.input}
+              required
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="content" className={styles.label}>Content:</label>
+            <textarea
+              id="content"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className={styles.textarea}
+              required
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="image" className={styles.label}>Image (optional):</label>
+            <input
+              type="file"
+              id="image"
+              accept="image/*"
+              onChange={handleFileChange}
+              className={styles.input}
+            />
+          </div>
+          <button type="submit" className={styles.submitButton} disabled={isLoading}>
+            {isLoading ? 'Submitting...' : 'Create Post'}
+          </button>
+        </form>
+      </div>
     </Layout>
   );
 };

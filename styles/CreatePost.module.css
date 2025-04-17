@@ -1,0 +1,103 @@
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #2c2c2c;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: #e0e0e0;
+  }
+  
+  .heading {
+    font-size: 2rem;
+    text-align: center;
+    color: #64b5f6;
+  }
+  
+  .form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .formGroup {
+    margin-bottom: 15px;
+  }
+  
+  .label {
+    font-size: 18px;
+    color: #e0e0e0;
+    margin-bottom: 5px;
+  }
+  
+  .input,
+  .textarea {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    color: #333;
+    background-color: #f4f4f4;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+  }
+  
+  .input:focus,
+  .textarea:focus {
+    outline: none;
+    border-color: #0070f3;
+    background-color: #fff;
+  }
+  
+  .textarea {
+    min-height: 200px;
+    resize: vertical;
+  }
+  
+  .submitButton {
+    padding: 15px;
+    font-size: 18px;
+    color: white;
+    background-color: #0070f3;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .submitButton:hover {
+    background-color: #005bb5;
+  }
+  
+  .submitButton:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+  }
+  
+  .error {
+    color: red;
+    font-size: 16px;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  .submitButton {
+    padding: 15px;
+    font-size: 18px;
+    color: white;
+    background-color: #0070f3;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%; 
+  }
+  
+  .submitButton:hover {
+    background-color: #005bb5;
+  }
+  
+  .submitButton:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+  }
+  

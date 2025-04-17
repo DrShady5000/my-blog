@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Head from 'next/head';
 import styles from '../styles/Layout.module.css'; 
-import { ReactNode } from 'react'; 
+import { ReactNode } from 'react';
 
 interface LayoutProps {
   children: ReactNode;
@@ -14,11 +14,10 @@ const Layout = ({ children }: LayoutProps) => {
         <title>Sahil's Blog</title>
         <meta name="description" content="Sahil's full-stack blog" />
       </Head>
-      
+
       <header className={styles.header}>
         <nav className={styles.nav}>
           <Link href="/" className={styles.link}>Home</Link>
-          <Link href="/about" className={styles.link}>About</Link>
         </nav>
       </header>
 
@@ -33,4 +32,4 @@ const Layout = ({ children }: LayoutProps) => {
   );
 };
 
-export default Layout;
+export default Layout; // Make sure only one default export is here
