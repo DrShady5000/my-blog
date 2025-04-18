@@ -9,38 +9,5 @@
     ],
     "date": "17/04/2025",
     "image": null
-  },
-  {
-    "id": 1744883985577,
-    "title": [
-      "Authorization: Bearer your-secret-token"
-    ],
-    "content": [
-      "Authorization: Bearer your-secret-token"
-    ],
-    "date": "17/04/2025",
-    "image": null
-  },
-  {
-    "id": 1744884168712,
-    "title": [
-      "s"
-    ],
-    "content": [
-      "d"
-    ],
-    "date": "17/04/2025",
-    "image": null
-  },
-  {
-    "id": 1744884244189,
-    "title": [
-      "ds"
-    ],
-    "content": [
-      "ds"
-    ],
-    "date": "17/04/2025",
-    "image": null
   }
 ]

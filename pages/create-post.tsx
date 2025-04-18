@@ -11,15 +11,18 @@ const CreatePost = () => {
   const [error, setError] = useState('');
   const router = useRouter();
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Check for required fields
     if (!title || !content) {
       setError('Title and content are required.');
       return;
     }
 
     setIsLoading(true);
+    setError(''); // Clear previous errors before submitting
 
     const formData = new FormData();
     formData.append('title', title);
@@ -35,31 +38,36 @@ const CreatePost = () => {
       });
 
       if (res.ok) {
-        router.push('/');
+        router.push('/'); // Redirect to homepage on success
       } else {
         throw new Error('Failed to create the post.');
       }
-    } catch (error) {
-      setError(error.message);
+    } catch (err) { 
+      if (err instanceof Error) {
+        setError(err.message); // Access 'message' if it's an instance of Error
+      } else {
+        setError('An unknown error occurred.');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Handle image file change
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const file = e.target.files[0];
-  
-      // Check if the file exists and has a size property
+
+      // Validate file size
       if (file) {
-        const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+        const MAX_SIZE = 5 * 1024 * 1024; // 5MB limit
         if (file.size > MAX_SIZE) {
           setError('File size must be less than 5MB.');
           return;
         }
-  
+
         setImage(file);
-        setError(''); 
+        setError(''); // Clear error if file is valid
       }
     }
   };
@@ -68,7 +76,7 @@ const CreatePost = () => {
     <Layout>
       <div className={styles.container}>
         <h1 className={styles.heading}>Create a New Post</h1>
-        {error && <p className={styles.error}>{error}</p>}
+        {error && <p className={styles.error}>{error}</p>} {/* Show error message */}
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
             <label htmlFor="title" className={styles.label}>Title:</label>

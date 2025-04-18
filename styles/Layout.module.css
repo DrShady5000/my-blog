@@ -18,13 +18,14 @@
 }
 
 .link {
-  color: #64b5f6; 
+  color: #9fa8da;
   font-size: 20px;
   margin-right: 20px;
   text-decoration: none;
 }
 
 .link:hover {
+  color: #c5cae9;
   text-decoration: underline;
 }
 
@@ -41,12 +42,12 @@
 }
 
 .postList {
-  list-style-type: none; 
-  padding: 0;  
+  list-style-type: none;
+  padding: 0;
 }
 
-.postList li {
-  background-color: #2c2c2c; 
+.postItem {
+  background-color: #2c2c2c;
   border-radius: 5px;
   margin-bottom: 20px;
   padding: 15px;
@@ -73,32 +74,30 @@
   background-color: #005bb5;
 }
 
-.postList {
-  list-style-type: none;
-  padding: 0;
+.centerText {
+  text-align: center;
+  margin: 0 auto;
+  display: block;
 }
 
-.postItem {
-  background-color: #2c2c2c;
-  border-radius: 5px;
-  margin-bottom: 20px;
-  padding: 15px;
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
 }
 
 .createPostButton {
-  padding: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
   background-color: #0070f3;
   color: white;
   border: none;
+  border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .createPostButton:hover {
   background-color: #005bb5;
 }
 
-.centerText {
-  text-align: center;
-  margin: 0 auto;
-  display: block;
-}

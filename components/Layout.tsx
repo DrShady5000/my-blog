@@ -1,12 +1,14 @@
 import Link from 'next/link';
 import Head from 'next/head';
-import styles from '../styles/Layout.module.css'; 
+import styles from '../styles/Layout.module.css';
 import { ReactNode } from 'react';
 
+// Defines the expected prop type for the Layout component
 interface LayoutProps {
   children: ReactNode;
 }
 
+// Reusable layout wrapper for pages (adds header, footer, and styling)
 const Layout = ({ children }: LayoutProps) => {
   return (
     <div className={styles.layout}>
@@ -18,6 +20,7 @@ const Layout = ({ children }: LayoutProps) => {
       <header className={styles.header}>
         <nav className={styles.nav}>
           <Link href="/" className={styles.link}>Home</Link>
+          <Link href="/all-posts" className={styles.link}>All Posts</Link>
         </nav>
       </header>
 
@@ -32,4 +35,4 @@ const Layout = ({ children }: LayoutProps) => {
   );
 };
 
-export default Layout; // Make sure only one default export is here
+export default Layout;
