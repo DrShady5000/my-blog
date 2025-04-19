@@ -12,8 +12,8 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className={styles.layout}>
       <Head>
-        <title>Sahil's Blog</title>
-        <meta name="description" content="Sahil's full-stack blog" />
+        <title>Sahil&apos;s Blog</title>
+        <meta name="description" content="Sahil&apos;s full-stack blog" />
       </Head>
 
       <header className={styles.header}>
