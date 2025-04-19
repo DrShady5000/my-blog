@@ -44,7 +44,12 @@ const CreatePost = () => {
       });
 
       if (res.ok) {
-        router.push('/');
+        // Clear form after successful submission
+        setTitle('');
+        setContent('');
+        setImage(null);
+
+        router.push('/'); // Redirect to homepage on success
       } else {
         throw new Error('Failed to create the post.');
       }

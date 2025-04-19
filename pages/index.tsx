@@ -6,7 +6,7 @@ import styles from '../styles/Layout.module.css';
 interface Post {
   _id: string;
   title: string;
-  content: string[];  // Content as an array of paragraphs
+  content: string[] | string; // Content can be string[] or string
   date: string;
 }
 
@@ -25,7 +25,7 @@ const Home = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch('/api/posts');  // Fetch posts from API
+        const response = await fetch('/api/posts');
         if (!response.ok) {
           throw new Error(`Failed to fetch posts, status: ${response.status}`);
         }
@@ -33,14 +33,12 @@ const Home = () => {
         const data = await response.json();
 
         if (Array.isArray(data)) {
-          // Sort posts by date in descending order (newest first)
           const sortedPosts = data.sort((a: Post, b: Post) => {
             const dateA = parseDate(a.date);
             const dateB = parseDate(b.date);
             return dateB.getTime() - dateA.getTime();
           });
 
-          // Set only the limited number of posts for the homepage
           setPosts(sortedPosts.slice(0, postsPerPage));
         } else {
           throw new Error('Invalid data format');
@@ -51,7 +49,7 @@ const Home = () => {
       }
     };
 
-    fetchPosts();  // Call fetchPosts when the component mounts
+    fetchPosts();
   }, []);
 
   return (
@@ -65,38 +63,44 @@ const Home = () => {
         <p>
           This blog is where I document my full-stack journey, my projects, and just general thoughts about my life.
         </p>
+
         <h2>Posts</h2>
 
-        {error && <p className={styles.error}>{error}</p>}  {/* Display error message if there's an issue fetching posts */}
+        {error && <p className={styles.error}>{error}</p>}
 
         <ul className={styles.postList}>
-          {posts.map((post) => (
-            <li key={post._id} className={styles.postItem}>  
-              <Link href={`/posts/${post._id}`}> 
-                <h3 className={styles.postTitle}>{post.title}</h3>
-              </Link>
-              <p>
-                {
-                  // Show the first 150 characters
-                  post.content && post.content.length > 0 
-                    ? post.content[0].slice(0, 150) + '...'
-                    : ''
-                }
-              </p>
-              <Link href={`/posts/${post._id}`} className="readMoreLink"> 
-                Read more
-              </Link>
-              <p><strong>Posted on:</strong> {parseDate(post.date).toLocaleDateString('en-NZ')}</p>
-            </li>
-          ))}
+          {posts.map((post) => {
+            const firstParagraph = Array.isArray(post.content)
+              ? post.content[0] || ''
+              : typeof post.content === 'string'
+                ? post.content
+                : '';
+
+            const snippet = firstParagraph.length > 150
+              ? firstParagraph.slice(0, 150) + '...'
+              : firstParagraph;
+
+            return (
+              <li key={post._id} className={styles.postItem}>
+                <Link href={`/posts/${post._id}`} passHref>
+                  <h3 className={styles.postTitle}>{post.title}</h3>
+                </Link>
+                <p>{snippet}</p>
+                <Link href={`/posts/${post._id}`} className="readMoreLink">
+                  Read more
+                </Link>
+                <p><strong>Posted on:</strong> {parseDate(post.date).toLocaleDateString('en-NZ')}</p>
+              </li>
+            );
+          })}
         </ul>
 
         <div className={styles.buttons}>
           <Link href="/create-post">
-            <button className={styles.createPostButton}>Create New Post</button> 
+            <button className={styles.createPostButton}>Create New Post</button>
           </Link>
           <Link href="/all-posts">
-            <button className={styles.createPostButton}>See All Posts</button> 
+            <button className={styles.createPostButton}>See All Posts</button>
           </Link>
         </div>
       </div>

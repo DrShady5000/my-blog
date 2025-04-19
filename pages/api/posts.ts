@@ -6,7 +6,7 @@ import clientPromise from '../../lib/mongodb';
 
 export const config = {
   api: {
-    bodyParser: false, // Disable default body parser to use formidable
+    bodyParser: false, // Disable built-in body parsing for file uploads
   },
 };
 
@@ -23,55 +23,46 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'POST') {
     ensureImagesDirExists();
 
-    const form = new IncomingForm();
-    form.uploadDir = imagesDir;
-    form.keepExtensions = true;
-    form.multiples = false; // Only allow one image per post for now
+    const form = new IncomingForm({ multiples: false, keepExtensions: true, uploadDir: imagesDir });
 
+    // Parse the incoming form data
     form.parse(req, async (err, fields, files) => {
       if (err) {
-        console.error('Form parse error:', err);
-        return res.status(500).json({ error: 'Form parsing failed. Please try again.' });
+        console.error('Formidable error:', err);
+        return res.status(500).json({ error: 'Failed to parse form data.' });
       }
 
-      // Extract title and content, ensuring they are strings (handle arrays from form data)
+      // Normalize title and content
       const title = Array.isArray(fields.title) ? fields.title[0] : fields.title;
-      const content = Array.isArray(fields.content) ? JSON.parse(fields.content[0]) : []; // Parse content as an array
-      const file = files.image?.[0];
+      const content = Array.isArray(fields.content) ? fields.content[0] : fields.content;
 
-      // Validate title and content
-      if (!title || content.length === 0) {
-        return res.status(400).json({ error: 'Title and content are required' });
+      if (!title || !content) {
+        return res.status(400).json({ error: 'Title and content are required.' });
       }
 
-      if (title.trim().length < 5) {
-        return res.status(400).json({ error: 'Title must be at least 5 characters long' });
-      }
+      let imagePath: string | null = null;
 
-      if (content.join(' ').trim().length < 20) {
-        return res.status(400).json({ error: 'Content must be at least 20 characters long' });
-      }
+      // Handle the image file upload
+      if (files.image && !Array.isArray(files.image)) {
+        const file = files.image;
+        const MAX_SIZE = 5 * 1024 * 1024; // 5 MB limit
 
-      let imagePath = null;
-
-      // Handle file upload if there is an image
-      if (file) {
-        const MAX_SIZE = 5 * 1024 * 1024; // 5MB limit
-        if (file.size > MAX_SIZE) {
-          return res.status(400).json({ error: 'File size exceeds 5MB' });
+        // Check if the file size exceeds the limit
+        if (file.size && file.size > MAX_SIZE) {
+          return res.status(400).json({ error: 'Image exceeds 5MB limit.' });
         }
 
-        // Store the image path
-        imagePath = `/images/${file.newFilename}`;
+        // Set the image path for storage
+        imagePath = `/images/${path.basename(file.filepath)}`;
       }
 
       try {
-        // Connect to the database
+        // Connect to MongoDB
         const client = await clientPromise;
         const db = client.db('my-blog-db');
-        const collection = db.collection('posts');
+        const posts = db.collection('posts');
 
-        // Create the new post document
+        // Create the new post object
         const newPost = {
           title,
           content,
@@ -80,29 +71,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         };
 
         // Insert the new post into the database
-        await collection.insertOne(newPost);
+        const result = await posts.insertOne(newPost);
 
-        res.status(201).json({ message: 'Post created successfully', post: newPost });
-      } catch (dbErr) {
-        console.error('MongoDB insert error:', dbErr);
-        res.status(500).json({ error: 'Failed to save post to database. Please try again.' });
+        // Respond with the success message and post details
+        res.status(201).json({ message: 'Post created successfully', post: newPost, insertedId: result.insertedId });
+      } catch (dbError) {
+        console.error('DB error:', dbError);
+        res.status(500).json({ error: 'Failed to save post to the database.' });
       }
     });
   } else if (req.method === 'GET') {
     try {
+      // Connect to MongoDB
       const client = await clientPromise;
       const db = client.db('my-blog-db');
-      const collection = db.collection('posts');
+      const posts = db.collection('posts');
 
-      const posts = await collection.find().sort({ date: -1 }).toArray();
+      // Fetch all posts from the database, sorted by date
+      const allPosts = await posts.find().sort({ date: -1 }).toArray();
 
-      res.status(200).json(posts);
-    } catch (err) {
-      console.error('MongoDB fetch error:', err);
-      res.status(500).json({ error: 'Failed to fetch posts. Please try again.' });
+      // Respond with the posts
+      res.status(200).json(allPosts);
+    } catch (error) {
+      console.error('Failed to fetch posts:', error);
+      res.status(500).json({ error: 'Unable to fetch posts from the database.' });
     }
   } else {
-    res.setHeader('Allow', ['POST', 'GET']);
+    // Handle unsupported HTTP methods
+    res.setHeader('Allow', ['GET', 'POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
