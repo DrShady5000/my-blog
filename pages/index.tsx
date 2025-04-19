@@ -57,10 +57,12 @@ const Home = () => {
   return (
     <Layout>
       <div className={styles.centerText}>
-        <h1>Welcome to Sahil's Blog</h1>
+        <h1>Welcome to Sahil&apos;s Blog</h1>
         <h1>About Me</h1>
         <p>
-          I’m Sahil Deo, a full-stack developer. I specialize in React, Node.js, and cloud technologies.
+          I&apos;m Sahil Deo, a full-stack developer. I specialize in React, Node.js, and cloud technologies.
+        </p>
+        <p>
           This blog is where I document my full-stack journey, my projects, and just general thoughts about my life.
         </p>
         <h2>Posts</h2>
@@ -75,12 +77,12 @@ const Home = () => {
               </Link>
               <p>
                 {
-                  // Show the first 150 characters of the first paragraph or fallback to an empty string
+                  // Show the first 150 characters
                   post.content && post.content.length > 0 
                     ? post.content[0].slice(0, 150) + '...'
                     : ''
                 }
-              </p> {/* Show a snippet of the post content */}
+              </p>
               <Link href={`/posts/${post._id}`} className="readMoreLink"> 
                 Read more
               </Link>
