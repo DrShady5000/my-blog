@@ -7,14 +7,8 @@ interface Post {
   _id: string;
   title: string;
   content: string[] | string; // Content can be string[] or string
-  date: string;
+  date: string; // MongoDB Date format or ISO string
 }
-
-// Function to parse date format 'DD/MM/YYYY'
-const parseDate = (dateString: string) => {
-  const [day, month, year] = dateString.split('/');
-  return new Date(`${year}-${month}-${day}`);
-};
 
 const Home = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -34,9 +28,9 @@ const Home = () => {
 
         if (Array.isArray(data)) {
           const sortedPosts = data.sort((a: Post, b: Post) => {
-            const dateA = parseDate(a.date);
-            const dateB = parseDate(b.date);
-            return dateB.getTime() - dateA.getTime();
+            const dateA = new Date(a.date); // Convert to Date object
+            const dateB = new Date(b.date); // Convert to Date object
+            return dateB.getTime() - dateA.getTime(); // Compare dates
           });
 
           setPosts(sortedPosts.slice(0, postsPerPage));
@@ -89,7 +83,7 @@ const Home = () => {
                 <Link href={`/posts/${post._id}`} className="readMoreLink">
                   Read more
                 </Link>
-                <p><strong>Posted on:</strong> {parseDate(post.date).toLocaleDateString('en-NZ')}</p>
+                <p><strong>Posted on:</strong> {new Date(post.date).toLocaleDateString('en-NZ')}</p>
               </li>
             );
           })}

@@ -5,7 +5,7 @@ import styles from '../styles/CreatePost.module.css';
 
 const CreatePost = () => {
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState(''); // Single string content initially
+  const [content, setContent] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -19,20 +19,14 @@ const CreatePost = () => {
       return;
     }
 
-    // Split content into paragraphs
-    const paragraphs = content.split('\n').map((para) => para.trim()).filter((para) => para.length > 0);
-
-    if (paragraphs.length === 0) {
-      setError('Content must have at least one paragraph.');
-      return;
-    }
+    const contentString = content.split('\n').join('\n');
 
     setIsLoading(true);
     setError('');
 
     const formData = new FormData();
     formData.append('title', title);
-    formData.append('content', JSON.stringify(paragraphs)); // Store as an array of paragraphs
+    formData.append('content', contentString); // Send content as a single string
     if (image) {
       formData.append('image', image);
     }

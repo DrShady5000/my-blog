@@ -32,6 +32,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: 'Failed to parse form data.' });
       }
 
+      // Debugging log to check the fields being received
+      console.log('fields:', fields);
+      console.log('files:', files);
+
       // Normalize title and content
       const title = Array.isArray(fields.title) ? fields.title[0] : fields.title;
       const content = Array.isArray(fields.content) ? fields.content[0] : fields.content;
@@ -65,12 +69,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Create the new post object
         const newPost = {
           title,
-          content,
+          content, 
           image: imagePath,
-          date: new Date().toLocaleDateString('en-NZ'),
+          date: new Date().toISOString(), 
         };
 
-        // Insert the new post into the database
+        console.log('New post object:', newPost);
+
         const result = await posts.insertOne(newPost);
 
         // Respond with the success message and post details

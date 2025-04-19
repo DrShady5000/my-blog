@@ -1,12 +1,12 @@
 import { MongoClient, ObjectId } from 'mongodb';
 import { GetStaticProps, GetStaticPaths } from 'next';
 
-const MONGODB_URI = process.env.MONGODB_URI!;  // Ensure this is defined
+const MONGODB_URI = process.env.MONGODB_URI!;
 
 interface Post {
-  _id: string | ObjectId;  // MongoDB's default _id field, can be a string or ObjectId
+  _id: string | ObjectId;  // Can be a string or ObjectId
   title: string;
-  content: string | string[];  // content can be a string or an array of strings
+  content: string | string[];  // Content can be a string or an array of strings
   date: string;
   image?: string;
 }
@@ -29,6 +29,7 @@ export async function getStaticProps({ params }: { params: { id: string } }) {
 
     return {
       props: { post: JSON.parse(JSON.stringify(post)) },
+      revalidate: 10,
     };
   } catch (error) {
     console.error('Error fetching post:', error);
@@ -109,11 +110,11 @@ const PostPage = ({ post }: { post: Post | null }) => {
     );
   }
 
-  const [day, month, year] = post.date.split('/');
-  const formattedDate = new Date(`${year}-${month}-${day}`).toLocaleDateString('en-NZ');
+  const formattedDate = new Date(post.date).toLocaleDateString('en-NZ');
 
   const contentString = Array.isArray(post.content) ? post.content.join('\n') : post.content;
 
+  // Break the content into paragraphs
   const contentParagraphs = contentString.split('\n').map((paragraph, index) => (
     <p key={index}>{paragraph}</p>
   ));
