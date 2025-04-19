@@ -95,7 +95,6 @@
   text-align: center;
 }
 
-/* Responsive tweak */
 @media (max-width: 600px) {
   .container {
     padding: 15px;

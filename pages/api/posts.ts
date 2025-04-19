@@ -2,100 +2,107 @@ import { IncomingForm } from 'formidable';
 import fs from 'fs';
 import path from 'path';
 import { NextApiRequest, NextApiResponse } from 'next';
+import clientPromise from '../../lib/mongodb';
 
-// Define paths for post storage and image uploads
-const postsFilePath = path.join(process.cwd(), 'data', 'posts.json');
+export const config = {
+  api: {
+    bodyParser: false, // Disable default body parser to use formidable
+  },
+};
+
 const imagesDir = path.join(process.cwd(), 'public', 'images');
 
-// Reads all posts from the JSON file
-const readPosts = () => {
-  const fileContent = fs.readFileSync(postsFilePath, 'utf-8');
-  return JSON.parse(fileContent);
-};
-
-// Writes updated post data to the JSON file
-const writePosts = (posts: any[]) => {
-  fs.writeFileSync(postsFilePath, JSON.stringify(posts, null, 2), 'utf-8');
-};
-
-// Ensures the image upload folder exists
+// Ensure the images directory exists
 const ensureImagesDirExists = () => {
   if (!fs.existsSync(imagesDir)) {
     fs.mkdirSync(imagesDir, { recursive: true });
   }
 };
 
-// Disables Next.js default body parsing (needed for file uploads)
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-// API Route Handler
-export default (req: NextApiRequest, res: NextApiResponse) => {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
-    ensureImagesDirExists(); // Create image directory if missing
+    ensureImagesDirExists();
 
     const form = new IncomingForm();
     form.uploadDir = imagesDir;
     form.keepExtensions = true;
+    form.multiples = false; // Only allow one image per post for now
 
-    // Validate file before saving
-    form.on('fileBegin', (name, file) => {
-      if (file) {
-        if (!file.mimetype || !file.mimetype.startsWith('image/')) {
-          return res.status(400).json({ error: 'Only image files are allowed.' });
-        }
-
-        const MAX_SIZE = 5 * 1024 * 1024; // 5MB size limit
-        if (file.size > MAX_SIZE) {
-          return res.status(400).json({ error: 'File size must be less than 5MB.' });
-        }
-      }
-    });
-
-    // Parse form data and handle post creation
-    form.parse(req, (err, fields, files) => {
+    form.parse(req, async (err, fields, files) => {
       if (err) {
-        return res.status(500).json({ error: 'Failed to parse the form' });
+        console.error('Form parse error:', err);
+        return res.status(500).json({ error: 'Form parsing failed. Please try again.' });
       }
 
-      const { title, content } = fields;
-      const image = files.image ? `/images/${files.image[0].newFilename}` : null;
+      // Extract title and content, ensuring they are strings (handle arrays from form data)
+      const title = Array.isArray(fields.title) ? fields.title[0] : fields.title;
+      const content = Array.isArray(fields.content) ? JSON.parse(fields.content[0]) : []; // Parse content as an array
+      const file = files.image?.[0];
 
-      if (!title || !content) {
-        return res.status(400).json({ error: 'Title and content are required.' });
+      // Validate title and content
+      if (!title || content.length === 0) {
+        return res.status(400).json({ error: 'Title and content are required' });
       }
 
-      // Create new post object
-      const newPost = {
-        id: Date.now(),
-        title,
-        content,
-        date: new Date().toLocaleDateString(),
-        image,
-      };
+      if (title.trim().length < 5) {
+        return res.status(400).json({ error: 'Title must be at least 5 characters long' });
+      }
 
-      // Save post to file
-      const posts = readPosts();
-      posts.push(newPost);
-      writePosts(posts);
+      if (content.join(' ').trim().length < 20) {
+        return res.status(400).json({ error: 'Content must be at least 20 characters long' });
+      }
 
-      res.status(201).json(newPost);
+      let imagePath = null;
+
+      // Handle file upload if there is an image
+      if (file) {
+        const MAX_SIZE = 5 * 1024 * 1024; // 5MB limit
+        if (file.size > MAX_SIZE) {
+          return res.status(400).json({ error: 'File size exceeds 5MB' });
+        }
+
+        // Store the image path
+        imagePath = `/images/${file.newFilename}`;
+      }
+
+      try {
+        // Connect to the database
+        const client = await clientPromise;
+        const db = client.db('my-blog-db');
+        const collection = db.collection('posts');
+
+        // Create the new post document
+        const newPost = {
+          title,
+          content,
+          image: imagePath,
+          date: new Date().toLocaleDateString('en-NZ'),
+        };
+
+        // Insert the new post into the database
+        await collection.insertOne(newPost);
+
+        res.status(201).json({ message: 'Post created successfully', post: newPost });
+      } catch (dbErr) {
+        console.error('MongoDB insert error:', dbErr);
+        res.status(500).json({ error: 'Failed to save post to database. Please try again.' });
+      }
     });
-
   } else if (req.method === 'GET') {
-    // Return all posts
     try {
-      const posts = readPosts();
-      res.status(200).json(posts);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch posts' });
-    }
+      const client = await clientPromise;
+      const db = client.db('my-blog-db');
+      const collection = db.collection('posts');
 
+      const posts = await collection.find().sort({ date: -1 }).toArray();
+
+      res.status(200).json(posts);
+    } catch (err) {
+      console.error('MongoDB fetch error:', err);
+      res.status(500).json({ error: 'Failed to fetch posts. Please try again.' });
+    }
   } else {
-    // Method not allowed
-    res.status(405).end();
+    res.setHeader('Allow', ['POST', 'GET']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
-};
+}

@@ -3,7 +3,6 @@ import Head from 'next/head';
 import styles from '../styles/Layout.module.css';
 import { ReactNode } from 'react';
 
-// Defines the expected prop type for the Layout component
 interface LayoutProps {
   children: ReactNode;
 }

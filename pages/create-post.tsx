@@ -5,28 +5,34 @@ import styles from '../styles/CreatePost.module.css';
 
 const CreatePost = () => {
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(''); // Single string content initially
   const [image, setImage] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check for required fields
-    if (!title || !content) {
+    if (!title.trim() || !content.trim()) {
       setError('Title and content are required.');
       return;
     }
 
+    // Split content into paragraphs
+    const paragraphs = content.split('\n').map((para) => para.trim()).filter((para) => para.length > 0);
+
+    if (paragraphs.length === 0) {
+      setError('Content must have at least one paragraph.');
+      return;
+    }
+
     setIsLoading(true);
-    setError(''); // Clear previous errors before submitting
+    setError('');
 
     const formData = new FormData();
     formData.append('title', title);
-    formData.append('content', content);
+    formData.append('content', JSON.stringify(paragraphs)); // Store as an array of paragraphs
     if (image) {
       formData.append('image', image);
     }
@@ -38,13 +44,13 @@ const CreatePost = () => {
       });
 
       if (res.ok) {
-        router.push('/'); // Redirect to homepage on success
+        router.push('/');
       } else {
         throw new Error('Failed to create the post.');
       }
-    } catch (err) { 
+    } catch (err) {
       if (err instanceof Error) {
-        setError(err.message); // Access 'message' if it's an instance of Error
+        setError(err.message);
       } else {
         setError('An unknown error occurred.');
       }
@@ -53,22 +59,16 @@ const CreatePost = () => {
     }
   };
 
-  // Handle image file change
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const file = e.target.files[0];
-
-      // Validate file size
-      if (file) {
-        const MAX_SIZE = 5 * 1024 * 1024; // 5MB limit
-        if (file.size > MAX_SIZE) {
-          setError('File size must be less than 5MB.');
-          return;
-        }
-
-        setImage(file);
-        setError(''); // Clear error if file is valid
+      const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+      if (file.size > MAX_SIZE) {
+        setError('File size must be less than 5MB.');
+        return;
       }
+      setImage(file);
+      setError('');
     }
   };
 
@@ -76,7 +76,7 @@ const CreatePost = () => {
     <Layout>
       <div className={styles.container}>
         <h1 className={styles.heading}>Create a New Post</h1>
-        {error && <p className={styles.error}>{error}</p>} {/* Show error message */}
+        {error && <p className={styles.error}>{error}</p>}
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
             <label htmlFor="title" className={styles.label}>Title:</label>
@@ -89,6 +89,7 @@ const CreatePost = () => {
               required
             />
           </div>
+
           <div className={styles.formGroup}>
             <label htmlFor="content" className={styles.label}>Content:</label>
             <textarea
@@ -97,8 +98,10 @@ const CreatePost = () => {
               onChange={(e) => setContent(e.target.value)}
               className={styles.textarea}
               required
+              placeholder="Write your post here..."
             />
           </div>
+
           <div className={styles.formGroup}>
             <label htmlFor="image" className={styles.label}>Image (optional):</label>
             <input
@@ -109,6 +112,7 @@ const CreatePost = () => {
               className={styles.input}
             />
           </div>
+
           <button type="submit" className={styles.submitButton} disabled={isLoading}>
             {isLoading ? 'Submitting...' : 'Create Post'}
           </button>

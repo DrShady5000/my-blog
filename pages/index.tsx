@@ -4,9 +4,9 @@ import Link from 'next/link';
 import styles from '../styles/Layout.module.css';
 
 interface Post {
-  id: number | string;
+  _id: string;
   title: string;
-  content: string[];
+  content: string[];  // Content as an array of paragraphs
   date: string;
 }
 
@@ -37,7 +37,7 @@ const Home = () => {
           const sortedPosts = data.sort((a: Post, b: Post) => {
             const dateA = parseDate(a.date);
             const dateB = parseDate(b.date);
-            return dateB.getTime() - dateA.getTime();  // Compare timestamps
+            return dateB.getTime() - dateA.getTime();
           });
 
           // Set only the limited number of posts for the homepage
@@ -69,15 +69,22 @@ const Home = () => {
 
         <ul className={styles.postList}>
           {posts.map((post) => (
-            <li key={post.id} className={styles.postItem}>
-              <Link href={`/posts/${post.id}`}>
+            <li key={post._id} className={styles.postItem}>  
+              <Link href={`/posts/${post._id}`}> 
                 <h3 className={styles.postTitle}>{post.title}</h3>
               </Link>
-              <p>{post.content[0].substring(0, 150)}...</p> {/* Show a snippet of the post content */}
-              <Link href={`/posts/${post.id}`} className="readMoreLink">
+              <p>
+                {
+                  // Show the first 150 characters of the first paragraph or fallback to an empty string
+                  post.content && post.content.length > 0 
+                    ? post.content[0].slice(0, 150) + '...'
+                    : ''
+                }
+              </p> {/* Show a snippet of the post content */}
+              <Link href={`/posts/${post._id}`} className="readMoreLink"> 
                 Read more
               </Link>
-              <p><strong>Posted on:</strong> {parseDate(post.date).toLocaleDateString('en-NZ')}</p> {/* Display the post date */}
+              <p><strong>Posted on:</strong> {parseDate(post.date).toLocaleDateString('en-NZ')}</p>
             </li>
           ))}
         </ul>
