@@ -1,9 +1,9 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, Db, Collection } from 'mongodb';
 
 const uri = process.env.MONGODB_URI!;
 const options = {};
 
-let client;
+let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
 if (!process.env.MONGODB_URI) {
