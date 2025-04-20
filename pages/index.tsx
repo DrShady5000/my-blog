@@ -6,15 +6,15 @@ import styles from '../styles/Layout.module.css';
 interface Post {
   _id: string;
   title: string;
-  content: string[] | string; // Content can be string[] or string
-  date: string; // MongoDB Date format or ISO string
+  content: string;
+  date: string;
 }
 
 const Home = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const postsPerPage = 3; // Limit posts per page on the homepage
+  const postsPerPage = 3;
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -27,11 +27,9 @@ const Home = () => {
         const data = await response.json();
 
         if (Array.isArray(data)) {
-          const sortedPosts = data.sort((a: Post, b: Post) => {
-            const dateA = new Date(a.date); // Convert to Date object
-            const dateB = new Date(b.date); // Convert to Date object
-            return dateB.getTime() - dateA.getTime(); // Compare dates
-          });
+          const sortedPosts = data.sort((a: Post, b: Post) =>
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
 
           setPosts(sortedPosts.slice(0, postsPerPage));
         } else {
@@ -59,20 +57,13 @@ const Home = () => {
         </p>
 
         <h2>Posts</h2>
-
         {error && <p className={styles.error}>{error}</p>}
 
         <ul className={styles.postList}>
           {posts.map((post) => {
-            const firstParagraph = Array.isArray(post.content)
-              ? post.content[0] || ''
-              : typeof post.content === 'string'
-                ? post.content
-                : '';
-
-            const snippet = firstParagraph.length > 150
-              ? firstParagraph.slice(0, 150) + '...'
-              : firstParagraph;
+            const snippet = post.content.length > 150
+              ? post.content.slice(0, 150) + '...'
+              : post.content;
 
             return (
               <li key={post._id} className={styles.postItem}>

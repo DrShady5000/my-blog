@@ -4,26 +4,17 @@ import Link from 'next/link';
 import styles from '../styles/Layout.module.css';
 
 interface Post {
-  id: number | string;
+  _id: string;
   title: string;
-  content: string[];
+  content: string;
   date: string;
 }
-
-// Function to parse date from dd/mm/yyyy format
-const parseDate = (dateString: string) => {
-  const [day, month, year] = dateString.split('/');
-  return new Date(`${year}-${month}-${day}`);
-};
 
 const AllPosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const postsPerPage = 3; // Number of posts to display on the homepage
-
   useEffect(() => {
-    // Fetching posts from the API
     const fetchPosts = async () => {
       try {
         const response = await fetch('/api/posts');
@@ -32,15 +23,10 @@ const AllPosts = () => {
         const data = await response.json();
 
         if (Array.isArray(data)) {
-          // Sorting posts by date (newest first)
-          const sortedPosts = data.sort((a: Post, b: Post) => {
-            const dateA = parseDate(a.date);
-            const dateB = parseDate(b.date);
-            return dateB.getTime() - dateA.getTime();
-          });
-
-          // Setting posts to state, limiting to postsPerPage
-          setPosts(sortedPosts.slice(0, postsPerPage));
+          const sortedPosts = data.sort((a: Post, b: Post) =>
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
+          setPosts(sortedPosts);
         } else {
           throw new Error('Invalid data format');
         }
@@ -61,18 +47,24 @@ const AllPosts = () => {
         {error && <p className={styles.error}>{error}</p>}
 
         <ul className={styles.postList}>
-          {posts.map((post) => (
-            <li key={post.id} className={styles.postItem}>
-              <Link href={`/posts/${post.id}`}>
-                <h3 className={styles.postTitle}>{post.title}</h3>
-              </Link>
-              <p>{post.content[0].substring(0, 150)}...</p>
-              <Link href={`/posts/${post.id}`} className="readMoreLink">
-                Read more
-              </Link>
-              <p><strong>Posted on:</strong> {parseDate(post.date).toLocaleDateString('en-NZ')}</p>
-            </li>
-          ))}
+          {posts.map((post) => {
+            const snippet = post.content.length > 150
+              ? post.content.slice(0, 150) + '...'
+              : post.content;
+
+            return (
+              <li key={post._id} className={styles.postItem}>
+                <Link href={`/posts/${post._id}`}>
+                  <h3 className={styles.postTitle}>{post.title}</h3>
+                </Link>
+                <p>{snippet}</p>
+                <Link href={`/posts/${post._id}`} className="readMoreLink">
+                  Read more
+                </Link>
+                <p><strong>Posted on:</strong> {new Date(post.date).toLocaleDateString('en-NZ')}</p>
+              </li>
+            );
+          })}
         </ul>
 
         <div className={styles.buttons}>

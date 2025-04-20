@@ -1,18 +1,19 @@
 import { MongoClient, ObjectId } from 'mongodb';
 import { GetStaticProps, GetStaticPaths } from 'next';
+import { useRouter } from 'next/router';
 
 const MONGODB_URI = process.env.MONGODB_URI!;
 
 interface Post {
-  _id: string | ObjectId;  // Can be a string or ObjectId
+  _id: string;
   title: string;
-  content: string | string[];  // Content can be a string or an array of strings
+  content: string;
   date: string;
   image?: string;
 }
 
-export async function getStaticProps({ params }: { params: { id: string } }) {
-  const { id } = params;
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const id = params?.id as string;
 
   try {
     const client = await MongoClient.connect(MONGODB_URI);
@@ -35,9 +36,9 @@ export async function getStaticProps({ params }: { params: { id: string } }) {
     console.error('Error fetching post:', error);
     return { notFound: true };
   }
-}
+};
 
-export async function getStaticPaths() {
+export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const client = await MongoClient.connect(MONGODB_URI);
     const db = client.db();
@@ -47,7 +48,7 @@ export async function getStaticPaths() {
 
     client.close();
 
-    const paths = posts.map((post: Post) => ({
+    const paths = posts.map((post) => ({
       params: { id: post._id.toString() },
     }));
 
@@ -59,7 +60,7 @@ export async function getStaticPaths() {
     console.error('Error fetching posts:', error);
     return { paths: [], fallback: true };
   }
-}
+};
 
 const styles = {
   container: {
@@ -101,6 +102,16 @@ const styles = {
 };
 
 const PostPage = ({ post }: { post: Post | null }) => {
+  const router = useRouter();
+
+  if (router.isFallback) {
+    return (
+      <div style={styles.container}>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
   if (!post) {
     return (
       <div style={styles.notFound}>
@@ -111,11 +122,7 @@ const PostPage = ({ post }: { post: Post | null }) => {
   }
 
   const formattedDate = new Date(post.date).toLocaleDateString('en-NZ');
-
-  const contentString = Array.isArray(post.content) ? post.content.join('\n') : post.content;
-
-  // Break the content into paragraphs
-  const contentParagraphs = contentString.split('\n').map((paragraph, index) => (
+  const contentParagraphs = post.content.split('\n').map((paragraph, index) => (
     <p key={index}>{paragraph}</p>
   ));
 
@@ -139,10 +146,7 @@ const PostPage = ({ post }: { post: Post | null }) => {
       )}
 
       <div style={{ marginTop: '20px' }}>
-        <button
-          onClick={() => window.history.back()}
-          style={styles.button}
-        >
+        <button onClick={() => window.history.back()} style={styles.button}>
           Back to Home
         </button>
       </div>
