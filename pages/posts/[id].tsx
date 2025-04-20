@@ -1,6 +1,7 @@
 import { MongoClient, ObjectId } from 'mongodb';
 import { GetStaticProps, GetStaticPaths } from 'next';
 import { useRouter } from 'next/router';
+import Image from 'next/image';  // Import Next.js Image component
 
 const MONGODB_URI = process.env.MONGODB_URI!;
 
@@ -137,9 +138,12 @@ const PostPage = ({ post }: { post: Post | null }) => {
 
       {post.image && (
         <div style={styles.imageContainer}>
-          <img
+          <Image
             src={post.image}
             alt={post.title}
+            layout="responsive" // Adjusts layout for responsive sizing
+            width={800}         // Adjust width (can also use intrinsic for auto size)
+            height={600}        // Adjust height
             style={styles.image}
           />
         </div>
