@@ -2,7 +2,7 @@ import { MongoClient, ObjectId } from 'mongodb';
 import { GetStaticProps, GetStaticPaths } from 'next';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
-import styles from '../../styles/PostPage.module.css';
+import styles from '../../styles/PostContent.module.css';
 
 const MONGODB_URI = process.env.MONGODB_URI!;
 
