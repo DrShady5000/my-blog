@@ -44,6 +44,7 @@ const CreatePost = () => {
         setError(json.error || 'Failed to create the post.');
       }
     } catch (err) {
+      console.error('Error while creating post:', err);
       setError('An unknown error occurred.');
     } finally {
       setIsLoading(false);
@@ -56,7 +57,6 @@ const CreatePost = () => {
         <h1 className={styles.heading}>Create a New Post</h1>
         {error && <p className={styles.error}>{error}</p>}
         <form onSubmit={handleSubmit} className={styles.form}>
-
           <div className={styles.formGroup}>
             <label htmlFor="title" className={styles.label}>Title:</label>
             <input
