@@ -6,6 +6,7 @@ import styles from '../styles/CreatePost.module.css';
 const CreatePost = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [adminToken, setAdminToken] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -13,8 +14,8 @@ const CreatePost = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title.trim() || !content.trim()) {
-      setError('Title and content are required.');
+    if (!title.trim() || !content.trim() || !adminToken.trim()) {
+      setError('Title, content, and admin token are required.');
       return;
     }
 
@@ -26,6 +27,7 @@ const CreatePost = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-admin-token': adminToken,
         },
         body: JSON.stringify({ title, content }),
       });
@@ -33,16 +35,16 @@ const CreatePost = () => {
       if (res.ok) {
         setTitle('');
         setContent('');
+        setAdminToken('');
         router.push('/');
+      } else if (res.status === 403) {
+        setError('Forbidden: Invalid admin token.');
       } else {
-        throw new Error('Failed to create the post.');
+        const json = await res.json();
+        setError(json.error || 'Failed to create the post.');
       }
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An unknown error occurred.');
-      }
+      setError('An unknown error occurred.');
     } finally {
       setIsLoading(false);
     }
@@ -54,6 +56,7 @@ const CreatePost = () => {
         <h1 className={styles.heading}>Create a New Post</h1>
         {error && <p className={styles.error}>{error}</p>}
         <form onSubmit={handleSubmit} className={styles.form}>
+
           <div className={styles.formGroup}>
             <label htmlFor="title" className={styles.label}>Title:</label>
             <input
@@ -75,6 +78,19 @@ const CreatePost = () => {
               className={styles.textarea}
               required
               placeholder="Write your post here..."
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="adminToken" className={styles.label}>Admin Token:</label>
+            <input
+              type="password"
+              id="adminToken"
+              value={adminToken}
+              onChange={(e) => setAdminToken(e.target.value)}
+              className={styles.input}
+              required
+              placeholder="Enter admin token"
             />
           </div>
 

@@ -6,8 +6,6 @@ import { ReactNode } from 'react';
 interface LayoutProps {
   children: ReactNode;
 }
-
-// Reusable layout wrapper for pages (adds header, footer, and styling)
 const Layout = ({ children }: LayoutProps) => {
   return (
     <div className={styles.layout}>

@@ -3,6 +3,14 @@ import clientPromise from '../../lib/mongodb';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
+    // Get admin token from headers
+    const adminToken = req.headers['x-admin-token'];
+
+    // Check if admin token matches your secret
+    if (!adminToken || adminToken !== process.env.ADMIN_SECRET) {
+      return res.status(403).json({ error: 'Forbidden: Invalid admin token' });
+    }
+
     const { title, content } = req.body;
 
     if (!title || !content) {
